@@ -1,2 +1,2 @@
 # webcrawler
-Small web crawler developer in Java and Spring Boot
+Small web crawler developed in Java and Spring Boot
