@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HTMLDocument {
+
+    Logger logger = Logger.getLogger(HTMLDocument.class.getName());
 
     private String content;
     private int imgCount = 0;
@@ -38,13 +41,14 @@ public class HTMLDocument {
         List<String> links = new ArrayList<>();
 
         // gets title of the page
+        logger.fine(" .. process titles ..");
         Matcher titleMatcher = titlePattern.matcher(content == null ? "" : content);
         while (titleMatcher != null && titleMatcher.find()) {
             title = titleMatcher.group();
-            System.out.println(" title " + title);
         }
 
         // gets links from the current page
+        logger.fine(" .. process links ..");
         Matcher matcher = pattern.matcher(content == null ? "" : content);
         while (matcher != null && matcher.find()) {
             linkCount++;

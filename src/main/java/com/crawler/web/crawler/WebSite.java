@@ -9,8 +9,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Logger;
 
 public class WebSite {
+
+    final Logger logger = Logger.getLogger(WebSite.class.getName());
 
     private String url;
     public WebSite(final String url) {
@@ -29,15 +32,28 @@ public class WebSite {
         URLConnection connection = url.startsWith("https") ?
                 (HttpsURLConnection) site.openConnection() :
                 (HttpURLConnection) site.openConnection() ;
-        InputStream inputStream = connection.getInputStream();
-        return readResponse(inputStream);
+
+        int code = getSiteResponseCode(connection);
+
+        if(code == 200) {
+            InputStream inputStream = connection.getInputStream();
+            return readResponse(inputStream);
+        }
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException ioe) {
-
+            ioe.printStackTrace();
         }
 
-        return null;
+        return "";
+    }
+
+    private int getSiteResponseCode(URLConnection urlConnection) throws IOException {
+            return urlConnection instanceof HttpURLConnection
+                    ? ((HttpURLConnection)urlConnection).getResponseCode()
+                    : ((HttpsURLConnection)urlConnection).getResponseCode();
+
     }
 
     /**
@@ -54,6 +70,8 @@ public class WebSite {
             response.append(line).append("\n");
         }
         if(is != null) is.close();
+
+        logger.fine(".. processed response .. ");
         return response.toString();
     }
 

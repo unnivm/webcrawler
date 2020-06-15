@@ -34,14 +34,14 @@ public class CrawlerTask {
 
     private Logger log = Logger.getLogger(CrawlerTask.class.getName());
 
-    private LinkedList<String> queue = new LinkedList<>();
-
     @Autowired
     CrawlerService crawlerServie;
 
     @Async
     public void crawl(final String url, final int d, final String id) {
         CrawlerApplication.getCrawlerMap().put(id, PROCESSING);
+
+        final LinkedList<String> queue = new LinkedList<>();
         queue.add(url);
 
         int depthCount = 0;
@@ -53,7 +53,7 @@ public class CrawlerTask {
                 break;
             }
 
-            String u      = queue.poll();
+            String u  = queue.poll();
 
             WebSite webSite = new WebSite(u);
             String response = webSite.crawl();
@@ -72,15 +72,21 @@ public class CrawlerTask {
             depthCount++;
 
             log.info(" depth  " + depthCount);
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
+            // wait
+            justWaitForSomeTime();
         }
 
         CrawlerApplication.getCrawlerMap().put(id, COMPLETED);
         log.info("..FINISHED CRAWLING SITES for " + url);
+    }
+
+    private void justWaitForSomeTime() {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
