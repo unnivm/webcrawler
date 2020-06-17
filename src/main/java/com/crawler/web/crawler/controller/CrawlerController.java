@@ -106,7 +106,7 @@ public class CrawlerController {
      * cancel current crawling task and removes from the map
      * @param token
      */
-    @GetMapping("/stop/{token}")
+    @DeleteMapping("/stop/{token}")
     public ResponseEntity<String> stopCrawling(@PathVariable("token") String token) {
         Map<String, Future> map = CrawlerApplication.getCrawlerTask();
         Future<String>task = map.get(token);
