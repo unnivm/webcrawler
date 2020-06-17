@@ -4,14 +4,15 @@ import com.crawler.web.crawler.entity.Site;
 import com.crawler.web.crawler.service.CrawlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
-
-import static com.crawler.web.crawler.Constants.COMPLETED;
-import static  com.crawler.web.crawler.Constants.PROCESSING;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
+
+import static com.crawler.web.crawler.Constants.*;
 
 /**
  * This class will crawl web sites and will extract the links
@@ -24,6 +25,8 @@ import java.util.logging.Logger;
  *
  * The Async annotation is used to perform the crawling task as asynchronous
  * and it will not block
+ *
+ * The crawl() method is returning a future with the help of AsyncResult
  *
  * This class can be used to process multiple crawling requests
  * Once the crawling completed, it will update the status in a map
@@ -38,7 +41,7 @@ public class CrawlerTask {
     CrawlerService crawlerServie;
 
     @Async
-    public void crawl(final String url, final int d, final String id) {
+    public Future<String> crawl(final String url, final int d, final String id) {
         CrawlerApplication.getCrawlerMap().put(id, PROCESSING);
 
         final LinkedList<String> queue = new LinkedList<>();
@@ -53,9 +56,9 @@ public class CrawlerTask {
                 break;
             }
 
-            String u  = queue.poll();
+            String link  = queue.poll();
 
-            WebSite webSite = new WebSite(u);
+            WebSite webSite = new WebSite(link);
             String response = webSite.crawl();
             HTMLDocument htmlDocument = new HTMLDocument(response);
             List<String> links        = htmlDocument.getAllLinks();
@@ -64,29 +67,32 @@ public class CrawlerTask {
             // save this crawler information to the database
             Site site  = new Site();
             site.setToken(id);
+            String title = htmlDocument.getTitle();
+
+            // upto 100
+            title = title.length() > 100 ? title.substring(0, 100) : title;
             site.setTitle(htmlDocument.getTitle());
             site.setTotalImage(htmlDocument.getImgCount());
             site.setTotalLinks(htmlDocument.getLinkCount());
+
             crawlerServie.saveSite(site);
 
             depthCount++;
 
-            log.info(" depth  " + depthCount);
+            log.info(" depth  " + depthCount + " for " + id);
 
             // wait
-            justWaitForSomeTime();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                return new AsyncResult<String>(id);
+            }
         }
 
         CrawlerApplication.getCrawlerMap().put(id, COMPLETED);
         log.info("..FINISHED CRAWLING SITES for " + url);
-    }
 
-    private void justWaitForSomeTime() {
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        return new AsyncResult<String>(id);
     }
 
 }

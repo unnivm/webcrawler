@@ -13,7 +13,7 @@ public class Site {
     @Column
     private String token;
 
-    @Column
+    @Column(length=7000)
     private  String title;
 
     public Long getId() {

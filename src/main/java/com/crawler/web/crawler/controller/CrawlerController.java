@@ -17,7 +17,9 @@ import static com.crawler.web.crawler.Constants.INPROCESS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 @RestController
@@ -38,14 +40,19 @@ public class CrawlerController {
      * @param seedURL
      * @return
      */
-    @PostMapping("/start")
+    @GetMapping("/start")
     public ResponseEntity createCrawlerRequest(@RequestParam("depth") String depth, @RequestParam("seed") String seedURL) {
         log.info(" depth " + depth);
         log.info(" seed " + seedURL);
 
         String token = UUID.randomUUID().toString();
         CrawlerApplication.getCrawlerMap().put(token, INPROCESS);
-        crawlerTask.crawl(seedURL, Integer.parseInt(depth), token);
+
+        Future<String> result = crawlerTask.crawl(seedURL, Integer.parseInt(depth), token);
+
+        // saves the result
+        CrawlerApplication.getCrawlerTask().put(token, result);
+
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setStatus(INPROCESS);
         tokenDTO.setToken(token);
@@ -93,6 +100,23 @@ public class CrawlerController {
         crawlerDTO.setDetails(details);
 
         return new ResponseEntity(crawlerDTO, HttpStatus.OK);
+    }
+
+    /**
+     * cancel current crawling task and removes from the map
+     * @param token
+     */
+    @GetMapping("/stop/{token}")
+    public ResponseEntity<String> stopCrawling(@PathVariable("token") String token) {
+        Map<String, Future> map = CrawlerApplication.getCrawlerTask();
+        Future<String>task = map.get(token);
+        if(task!= null && !task.isDone()) {
+            task.cancel(true);
+            map.remove(token);
+            log.fine(".. crawling cancelled for this token .. " + token );
+            return new ResponseEntity<String>("the crawling has been cancelled for this token " + token, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>("This token is invalid " + token, HttpStatus.OK);
     }
 
 }

@@ -10,7 +10,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 
 @SpringBootApplication
 @EnableAsync
@@ -19,12 +21,29 @@ public class CrawlerApplication {
 	/** map used to hold token and crawling status **/
 	private static ConcurrentHashMap<String,String>crawlerMap = new ConcurrentHashMap<>();
 
+	/** map used to save current crawling task **/
+	private static ConcurrentHashMap<String, Future> list = new ConcurrentHashMap<>();
+
+
 	public static void main(String[] args) {
 		SpringApplication.run(CrawlerApplication.class, args);
 	}
 
+	/**
+	 * return crawler map
+	 * @return
+	 */
 	public static Map<String, String> getCrawlerMap() {
 		return crawlerMap;
 	}
+
+	/**
+	 * return crawler task map
+	 * @return
+	 */
+	public static ConcurrentHashMap<String,Future> getCrawlerTask() {
+		return list;
+	}
+
 
 }
