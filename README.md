@@ -17,8 +17,13 @@ This is a REST based crawler and crawling a web site can be started using a REST
 
   http://localhost:8080/status/<token> which will generate a JSON response.
   
-3. This is the last endpoint which will give you the result of the crawling.
+3. This  endpoint which will give you the result of the crawling.
 
-   http://localhost:8080/result<token>
+   http://localhost:8080/result/<token>
+  
+4. The following endpoint will cancel the current crawling task
+
+   http://localhost:8080/stop/token
+
   
   
