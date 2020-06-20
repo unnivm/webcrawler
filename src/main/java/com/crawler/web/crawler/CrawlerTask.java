@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
@@ -42,13 +42,17 @@ public class CrawlerTask {
 
     @Async
     public Future<String> crawl(final String url, final int d, final String id) {
+
         CrawlerApplication.getCrawlerMap().put(id, PROCESSING);
+
+        // Link tracker
 
         final LinkedList<String> queue = new LinkedList<>();
         queue.add(url);
 
         int depthCount = 0;
         while(!queue.isEmpty()) {
+
             CrawlerApplication.getCrawlerMap().put(id, "processing");
 
             if(depthCount == d) {
@@ -59,23 +63,34 @@ public class CrawlerTask {
             String link  = queue.poll();
 
             WebSite webSite = new WebSite(link);
+
+            log.info(" .. make request .. " + link);
+
             String response = webSite.crawl();
+
+            log.info(" .. response .. ");
+
             HTMLDocument htmlDocument = new HTMLDocument(response);
-            List<String> links        = htmlDocument.getAllLinks();
+            Set<String> links        = htmlDocument.getAllLinks();
+
             queue.addAll(links);
 
+            log.info(" .. links size .. " + queue.size());
             // save this crawler information to the database
             Site site  = new Site();
             site.setToken(id);
             String title = htmlDocument.getTitle();
 
+            log.info(" .. title.. " + title);
             // upto 100
+            title = title == null ? "":title.trim();
             title = title.length() > 100 ? title.substring(0, 100) : title;
             site.setTitle(htmlDocument.getTitle());
             site.setTotalImage(htmlDocument.getImgCount());
             site.setTotalLinks(htmlDocument.getLinkCount());
 
             crawlerServie.saveSite(site);
+            log.info(" .. saved.. " + title);
 
             depthCount++;
 
@@ -94,5 +109,6 @@ public class CrawlerTask {
 
         return new AsyncResult<String>(id);
     }
+
 
 }

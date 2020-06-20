@@ -5,7 +5,9 @@ import com.crawler.web.crawler.service.CrawlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +20,7 @@ public class HTMLDocument {
     private int imgCount = 0;
     private int linkCount = 0;
 
-    String regexp = "(img|http|https)://(\\w+\\.)+(edu|com|gov|org|img)";
+    String regexp = "(http|https)://(\\w+\\.)+(edu|com|gov|org|img)";
     Pattern pattern = Pattern.compile(regexp);
     Pattern imgPatten = Pattern.compile(".*<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);
 
@@ -37,18 +39,18 @@ public class HTMLDocument {
      *
      * @return
      */
-    public List<String> getAllLinks() {
-        List<String> links = new ArrayList<>();
+    public Set<String> getAllLinks() {
+        Set<String> links = new HashSet<>();
 
         // gets title of the page
-        logger.fine(" .. process titles ..");
+        logger.info(" .. process titles ..");
         Matcher titleMatcher = titlePattern.matcher(content == null ? "" : content);
         while (titleMatcher != null && titleMatcher.find()) {
             title = titleMatcher.group();
         }
 
         // gets links from the current page
-        logger.fine(" .. process links ..");
+        logger.info(" .. process links ..");
         Matcher matcher = pattern.matcher(content == null ? "" : content);
         while (matcher != null && matcher.find()) {
             linkCount++;
@@ -57,6 +59,7 @@ public class HTMLDocument {
         }
 
         // gets the total image from the current page
+        logger.info(" .. process images ..");
         Matcher imgMatcher = imgPatten.matcher(content == null ? "" : content);
         while (imgMatcher != null && imgMatcher.find()) {
             String w = imgMatcher.group();

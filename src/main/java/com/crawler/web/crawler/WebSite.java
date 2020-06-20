@@ -33,9 +33,11 @@ public class WebSite {
                 (HttpsURLConnection) site.openConnection() :
                 (HttpURLConnection) site.openConnection() ;
 
-        int code = getSiteResponseCode(connection);
+        connection.setConnectTimeout(5000);
 
-        if(code == 200) {
+        int code = getSiteResponseCode(connection);
+        logger.info(" .. response code .. " + code);
+        if(code == 200 || code == 400) {
             InputStream inputStream = connection.getInputStream();
             return readResponse(inputStream);
         }
