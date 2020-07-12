@@ -55,7 +55,7 @@ public class HTMLDocument {
 
         // gets title of the page
         logger.info(" .. process titles ..");
-        title = document.title();//document.getElementsByTag("title").first().toString();
+        title = document.title();
 
         logger.info(".. finished ...");
 

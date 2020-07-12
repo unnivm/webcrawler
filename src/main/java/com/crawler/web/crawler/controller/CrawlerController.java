@@ -40,7 +40,7 @@ public class CrawlerController {
      * @param seedURL
      * @return
      */
-    @GetMapping("/start")
+    @PostMapping("/start")
     public ResponseEntity createCrawlerRequest(@RequestParam("depth") String depth, @RequestParam("seed") String seedURL) {
         log.info(" depth " + depth);
         log.info(" seed " + seedURL);
