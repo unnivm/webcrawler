@@ -35,6 +35,8 @@ public class WebSite {
 
         connection.setConnectTimeout(5000);
 
+        connection.setRequestProperty("user-agent", "chrome");
+
         int code = getSiteResponseCode(connection);
         logger.info(" .. response code .. " + code);
         if(code == 200 || code == 400) {

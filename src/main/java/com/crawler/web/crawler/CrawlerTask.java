@@ -70,6 +70,11 @@ public class CrawlerTask {
 
             log.info(" .. response .. ");
 
+            if(response.isEmpty()) {
+                depthCount++;
+                continue;
+            }
+
             HTMLDocument htmlDocument = new HTMLDocument(response);
             Set<String> links        = htmlDocument.getAllLinks();
 

@@ -1,16 +1,16 @@
 package com.crawler.web.crawler;
 
-import com.crawler.web.crawler.entity.Site;
-import com.crawler.web.crawler.service.CrawlerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.crawler.web.crawler.Constants.A;
+import static com.crawler.web.crawler.Constants.HREF;
+import static com.crawler.web.crawler.Constants.IMG;
 
 public class HTMLDocument {
 
@@ -19,14 +19,6 @@ public class HTMLDocument {
     private String content;
     private int imgCount = 0;
     private int linkCount = 0;
-
-    String regexp = "(http|https)://(\\w+\\.)+(edu|com|gov|org|img)";
-    Pattern pattern = Pattern.compile(regexp);
-    Pattern imgPatten = Pattern.compile(".*<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);
-
-
-    private final Pattern titlePattern =
-            Pattern.compile("\\<title>(.*)\\</title>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private String title;
 
@@ -40,32 +32,32 @@ public class HTMLDocument {
      * @return
      */
     public Set<String> getAllLinks() {
+
         Set<String> links = new HashSet<>();
+        Document document = Jsoup.parse(this.content.trim());
+
+        Elements elements = document.select(A);
+        for(int i = 0; i<elements.size(); i++) {
+            String absUrl = elements.remove(i).absUrl(HREF);
+            if(!absUrl.isEmpty()) {
+                links.add(absUrl);
+                linkCount++;
+            }
+            i++;
+        }
+
+        logger.info(" .. process images ..");
+        Elements imgElements = document.select(IMG);
+        for(int i = 0; i<imgElements.size(); i++) {
+            imgElements.remove(i);
+            imgCount++;
+        }
 
         // gets title of the page
         logger.info(" .. process titles ..");
-        Matcher titleMatcher = titlePattern.matcher(content == null ? "" : content);
-        while (titleMatcher != null && titleMatcher.find()) {
-            title = titleMatcher.group();
-        }
+        title = document.title();//document.getElementsByTag("title").first().toString();
 
-        // gets links from the current page
-        logger.info(" .. process links ..");
-        Matcher matcher = pattern.matcher(content == null ? "" : content);
-        while (matcher != null && matcher.find()) {
-            linkCount++;
-            String w = matcher.group();
-            links.add(w);
-        }
-
-        // gets the total image from the current page
-        logger.info(" .. process images ..");
-        Matcher imgMatcher = imgPatten.matcher(content == null ? "" : content);
-        while (imgMatcher != null && imgMatcher.find()) {
-            String w = imgMatcher.group();
-            if (w != null && !w.isEmpty())
-                imgCount++;
-        }
+        logger.info(".. finished ...");
 
         return links;
     }
