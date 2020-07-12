@@ -16,6 +16,17 @@ public class Site {
     @Column(length=7000)
     private  String title;
 
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    @Column(length=500)
+    private String link;
+
     public Long getId() {
         return id;
     }

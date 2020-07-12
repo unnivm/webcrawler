@@ -56,9 +56,15 @@ public class CrawlerController {
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setStatus(INPROCESS);
         tokenDTO.setToken(token);
+
         return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
     }
 
+    /**
+     * will fetch the result of the current crawling operation
+     * @param token
+     * @return
+     */
     @GetMapping(value = "/status/{token}", produces = JSON)
     public ResponseEntity getStatus(@PathVariable("token") String token) {
         TokenDTO tokenDTO = new TokenDTO();
@@ -88,7 +94,7 @@ public class CrawlerController {
         for (Site site : list) {
             SiteDTO siteDTO = new SiteDTO();
             siteDTO.setImageCount(site.getTotalImage() + "");
-            siteDTO.setPageLink(site.getTotalImage() + "");
+            siteDTO.setPageLink(site.getLink());
             siteDTO.setPageTitle(site.getTitle());
 
             details.add(siteDTO);

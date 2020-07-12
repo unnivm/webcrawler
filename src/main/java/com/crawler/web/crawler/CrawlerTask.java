@@ -93,6 +93,7 @@ public class CrawlerTask {
             site.setTitle(htmlDocument.getTitle());
             site.setTotalImage(htmlDocument.getImgCount());
             site.setTotalLinks(htmlDocument.getLinkCount());
+            site.setLink(link);
 
             crawlerServie.saveSite(site);
             log.info(" .. saved.. " + title);
