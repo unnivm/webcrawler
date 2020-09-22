@@ -10,6 +10,7 @@ import com.crawler.web.crawler.service.CrawlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static com.crawler.web.crawler.Constants.JSON;
@@ -41,9 +42,11 @@ public class CrawlerController {
      * @return
      */
     @PostMapping("/start")
+    @PreAuthorize("hasAnyRole('ROLE_group1')")
     public ResponseEntity createCrawlerRequest(@RequestParam("depth") String depth, @RequestParam("seed") String seedURL) {
         log.info(" depth " + depth);
         log.info(" seed " + seedURL);
+
 
         String token = UUID.randomUUID().toString();
         CrawlerApplication.getCrawlerMap().put(token, INPROCESS);
